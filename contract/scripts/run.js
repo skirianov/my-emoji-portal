@@ -10,13 +10,14 @@ const main = async () => {
   let emojiCount;
   emojiCount = await emojiContract.getTotalEmojis();
 
-  let emoji = await emojiContract.submitEmoji();
-  await emoji.wait();
+  let emojiTxn = await emojiContract.submitEmoji('@SergiiKirianov', '😒');
+  await emojiTxn.wait();
 
-  emoji = await emojiContract.connect(randomPerson).submitEmoji();
-  await emoji.wait();
+  emojiTxn = await emojiContract.connect(randomPerson).submitEmoji('@radnom_person', '🤬');
+  await emojiTxn.wait();
 
-  emojiCount = await emojiContract.getTotalEmojis();
+  let allEmojis = await emojiContract.getAllEmojis();
+  console.log(allEmojis);
 };
 
 const runMain = async () => {

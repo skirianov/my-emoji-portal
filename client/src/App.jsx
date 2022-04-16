@@ -1,24 +1,35 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
+import moment from 'moment';
 import abi from './utils/EmojiPortal.json';
 import './App.css';
+import TwitterLogo from './assets/twitter-logo.png';
 
 const emojis = ['😁', '😂', '🤦‍♂️', '⭐️', '🥰', '💕', '🙈', '💩', '😕', '🤮'];
 
-const contractAddress = '0x8DB944CE182e07355b42A52e6a6c32b65809335A';
+const contractAddress = '0xC0a830E096834c027396606Cb514211a68456B23';
 const contractABI = abi.abi;
+
+const shortenAddress = (string) => {
+  const shortenString =
+    string.slice(0, 6) + '.....' + string.slice(string.length - 10, string.length - 1);
+  return shortenString;
+};
 
 export default function App() {
   const [currentAccount, setCurrentAccount] = useState(null);
   const [selectedEmoji, setSelectedEmoji] = useState(null);
   const [showCustom, setShowCustom] = useState(false);
   const [customEmoji, setCustomEmoji] = useState('');
-
-  console.log(selectedEmoji);
+  const [handler, setHandler] = useState('');
+  const [allEmojis, setAllEmojis] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    setIsLoading(true);
     checkIfWalletIsConnected();
+    getAllEmojis();
   }, []);
 
   const checkIfWalletIsConnected = async () => {
@@ -77,7 +88,7 @@ export default function App() {
         let count = await emojiPortalContract.getTotalEmojis();
         console.log('Retreived total emojis count...', count.toNumber());
 
-        const emojiTxn = await emojiPortalContract.submitEmoji();
+        const emojiTxn = await emojiPortalContract.submitEmoji(handler, selectedEmoji);
         console.log('Mining...', emojiTxn.hash);
 
         await emojiTxn.wait();
@@ -85,6 +96,36 @@ export default function App() {
       } else {
         console.log('Ethereum object does not exist');
       }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getAllEmojis = async () => {
+    try {
+      const { ethereum } = window;
+
+      if (!ethereum) {
+        return;
+      }
+
+      const provider = new ethers.providers.Web3Provider(ethereum);
+      const signer = provider.getSigner();
+      const emojiPortalContract = new ethers.Contract(contractAddress, contractABI, signer);
+
+      const emojis = await emojiPortalContract.getAllEmojis();
+
+      const filteredEmojis = emojis.map((emoji) => {
+        return {
+          address: emoji.sender,
+          author: emoji.author,
+          emoji: emoji.emoji,
+          timestamp: moment(emoji.timestamp).format('MMMM Do, YYYY h:mm:ss'),
+        };
+      });
+
+      setAllEmojis(filteredEmojis);
+      setIsLoading(false);
     } catch (error) {
       console.log(error);
     }
@@ -110,7 +151,7 @@ export default function App() {
             onClick={connectWallet}
             disabled={currentAccount}
           >
-            {currentAccount ? '✅' : 'Connect your wallet 🤑'}
+            {currentAccount ? '✅ Wallet Connected' : 'Connect your wallet 🤑'}
           </button>
           <div className="emojis-container">
             {emojis.map((emoji, i) => (
@@ -144,15 +185,46 @@ export default function App() {
               />
             )}
           </div>
-          <button className="emojiButton" onClick={emojiMe} disabled={!currentAccount}>
+          <input
+            value={handler}
+            placeholder="@TwitterHandler"
+            className="handler"
+            onChange={(e) => setHandler(e.target.value)}
+            pattern="^@[A-Za-z0-9_]{1,15}$"
+            required
+          />
+          <button className="emojiButton" onClick={emojiMe} disabled={!currentAccount || !handler}>
             SEND EMOJI 🙏
           </button>
         </div>
       </div>
       <div className="side">
-        <h3 style={{ textAlign: 'center' }}>Thank you for your emojis 💕</h3>
-        <h5>Total emojis: {}</h5>
-        <div></div>
+        {isLoading ? (
+          <div class="loader">Loading...</div>
+        ) : (
+          <>
+            <h3 style={{ textAlign: 'center', backgroundColor: 'transparent' }}>
+              Thank you for your emojis 💕
+            </h3>
+            <h5 style={{ backgroundColor: 'transparent' }}>Total emojis: {allEmojis.length}</h5>
+            {allEmojis.length &&
+              allEmojis.map((emoji) => (
+                <div className="emoji-record">
+                  <div className="record-details">
+                    <span className="record-emoji-logo">{emoji.emoji}</span>
+                    <a href={`https://twitter.com/${emoji.author}`} target="_blank">
+                      <img src={TwitterLogo} width="22px" height="22px" />
+                      {emoji.author}
+                    </a>
+                  </div>
+                  <div className="record-info">
+                    <span>{shortenAddress(emoji.address)}</span>
+                    <span>{emoji.timestamp}</span>
+                  </div>
+                </div>
+              ))}
+          </>
+        )}
       </div>
     </div>
   );
