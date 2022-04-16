@@ -8,7 +8,7 @@ const contractAddress = '0x8DB944CE182e07355b42A52e6a6c32b65809335A';
 const contractABI = abi.abi;
 
 export default function App() {
-  const [currentAccount, setCurrentAccount] = useState('');
+  const [currentAccount, setCurrentAccount] = useState(null);
 
   useEffect(() => {
     checkIfWalletIsConnected();
@@ -73,7 +73,7 @@ export default function App() {
 
         await emojiTxn.wait();
         console.log('Mined ---', emojiTxn.hash);
-        
+
        } else {
          console.log('Ethereum object does not exist');
        }
