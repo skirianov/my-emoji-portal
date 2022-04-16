@@ -54,6 +54,7 @@ export default function App() {
       }
     } catch (error) {
       console.log(error);
+      setIsLoading(false);
     }
   };
 
