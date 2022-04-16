@@ -25,6 +25,7 @@ export default function App() {
   const [handler, setHandler] = useState('');
   const [allEmojis, setAllEmojis] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [tnxLoading, setTnxLoading] = useState(false);
 
   useEffect(() => {
     setIsLoading(true);
@@ -77,6 +78,7 @@ export default function App() {
   };
 
   const emojiMe = async () => {
+    setTnxLoading(true);
     try {
       const { ethereum } = window;
 
@@ -92,12 +94,16 @@ export default function App() {
         console.log('Mining...', emojiTxn.hash);
 
         await emojiTxn.wait();
+        
+        setTnxLoading(false);
+        getAllEmojis();
         console.log('Mined ---', emojiTxn.hash);
       } else {
         console.log('Ethereum object does not exist');
       }
     } catch (error) {
       console.log(error);
+      setTnxLoading(false);
     }
   };
 
@@ -116,15 +122,21 @@ export default function App() {
       const emojis = await emojiPortalContract.getAllEmojis();
 
       const filteredEmojis = emojis.map((emoji) => {
+        const d = new Date(emoji.timestamp * 1000);
+        const time = d.toUTCString();
+        const UTC = time.substring(0, time.indexOf('GMT')) + 'UTC';
+
         return {
           address: emoji.sender,
           author: emoji.author,
           emoji: emoji.emoji,
-          timestamp: moment(emoji.timestamp).format('MMMM Do, YYYY h:mm:ss'),
+          timestamp: moment(UTC).format('DD MMMM, hh:mm:ss A'),
         };
       });
 
-      setAllEmojis(filteredEmojis);
+      const sortedEmojis = filteredEmojis.sort((a, b) => b.timestamp - a.timestamp);
+
+      setAllEmojis(sortedEmojis);
       setIsLoading(false);
     } catch (error) {
       console.log(error);
@@ -178,6 +190,7 @@ export default function App() {
                 placeholder="🤔"
                 value={customEmoji}
                 autoFocus
+                onBlur={() => setShowCustom(!showCustom)}
                 onChange={(e) => {
                   setSelectedEmoji(e.target.value);
                   setCustomEmoji(e.target.value);
@@ -193,8 +206,10 @@ export default function App() {
             pattern="^@[A-Za-z0-9_]{1,15}$"
             required
           />
-          <button className="emojiButton" onClick={emojiMe} disabled={!currentAccount || !handler}>
-            SEND EMOJI 🙏
+          <button className="emojiButton" onClick={emojiMe} disabled={!currentAccount || !handler || tnxLoading}>
+            {tnxLoading ? 'Loading...' : (
+              'SEND EMOJI 🙏'
+            )}
           </button>
         </div>
       </div>
