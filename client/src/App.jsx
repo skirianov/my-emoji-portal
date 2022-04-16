@@ -12,6 +12,8 @@ const contractABI = abi.abi;
 export default function App() {
   const [currentAccount, setCurrentAccount] = useState(null);
   const [selectedEmoji, setSelectedEmoji] = useState(null);
+  const [showCustom, setShowCustom] = useState(false);
+  const [customEmoji, setCustomEmoji] = useState('');
 
   console.log(selectedEmoji);
 
@@ -52,7 +54,9 @@ export default function App() {
         return;
       }
 
-      const account = await ethereum.request({ method: 'eth_requestAccounts' })[0];
+      const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+
+      const account = accounts[0];
 
       console.log('Connected', account);
       window.location.reload();
@@ -92,7 +96,8 @@ export default function App() {
         <div className="dataContainer">
           <div className="header">Hey there 😁</div>
           <div className="bio">
-            This is my first deployed app following Solidity course from <strong>builspace</strong> .
+            This is my first deployed app following Solidity course from <strong>builspace</strong>{' '}
+            .
           </div>
           <div className="bio">
             Pick one of the emojis you like and leave some message for me 😉
@@ -110,12 +115,34 @@ export default function App() {
           <div className="emojis-container">
             {emojis.map((emoji, i) => (
               <div
-                className={selectedEmoji === i ? 'selected-emoji' : 'emoji'}
-                onClick={() => setSelectedEmoji(i)}
+                className={i === emojis.indexOf(selectedEmoji) ? 'selected-emoji' : 'emoji'}
+                onClick={() => setSelectedEmoji(emoji)}
               >
                 {emoji}
               </div>
             ))}
+            {!showCustom && (
+              <button
+                className="emoji"
+                style={{ fontSize: '14px' }}
+                onClick={() => setShowCustom(!showCustom)}
+              >
+                Custom Emoji
+              </button>
+            )}
+            {showCustom && (
+              <input
+                className="emoji"
+                type="text"
+                placeholder="🤔"
+                value={customEmoji}
+                autoFocus
+                onChange={(e) => {
+                  setSelectedEmoji(e.target.value);
+                  setCustomEmoji(e.target.value);
+                }}
+              />
+            )}
           </div>
           <button className="emojiButton" onClick={emojiMe} disabled={!currentAccount}>
             SEND EMOJI 🙏
@@ -125,9 +152,7 @@ export default function App() {
       <div className="side">
         <h3 style={{ textAlign: 'center' }}>Thank you for your emojis 💕</h3>
         <h5>Total emojis: {}</h5>
-        <div>
-
-        </div>
+        <div></div>
       </div>
     </div>
   );
