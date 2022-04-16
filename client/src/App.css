@@ -12,10 +12,17 @@ html, body {
   flex-direction: row;
 }
 
-.mainContainer {
+.mainContainer-login {
   display: flex;
   justify-content: center;
   width: 70%;
+  margin-top: 64px;
+}
+
+.mainContainer {
+  display: flex;
+  justify-content: center;
+  width: 100%;
   margin-top: 64px;
 }
 
@@ -343,7 +350,7 @@ img {
     margin-top: 48px;
   }
 
-  .mainContainer {
+  .mainContainer-login {
     width: 100%;
   }
 

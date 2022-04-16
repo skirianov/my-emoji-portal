@@ -147,7 +147,7 @@ export default function App() {
 
   return (
     <div className="container">
-      <div className="mainContainer">
+      <div className={currentAccount ? "mainContainer-login" : "mainContainer"}>
         <div className="dataContainer">
           <div className="header">Hey there 😁</div>
           <div className="bio">
@@ -215,7 +215,8 @@ export default function App() {
           </button>
         </div>
       </div>
-      <div className="side">
+      {currentAccount && (
+        <div className="side">
         {isLoading ? (
           <div class="loader">Loading...</div>
         ) : (
@@ -243,6 +244,7 @@ export default function App() {
           </>
         )}
       </div>
+      )}
     </div>
   );
 }
