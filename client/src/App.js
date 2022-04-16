@@ -10,16 +10,17 @@ export default function App() {
   
   return (
     <div className="mainContainer">
-
       <div className="dataContainer">
         <div className="header">
-        👋 Hey there!
+        👋 Hey there! 😁
         </div>
-
         <div className="bio">
-        I am farza and I worked on self-driving cars so that's pretty cool right? Connect your Ethereum wallet and wave at me!
+        This is my first deployed Ethereum and Solidity course.
+        Pick one of the emojis you like and leave some message for me 😉
         </div>
-
+        <div className="bio">
+        YOOO THIS IS FREE. NO WORRIES 😂 
+        </div>
         <button className="waveButton" onClick={wave}>
           Wave at Me
         </button>
