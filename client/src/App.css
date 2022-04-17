@@ -3,7 +3,8 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   height: 100%;
 }
 
@@ -26,6 +27,13 @@ html, body {
   margin-top: 64px;
 }
 
+.dataContainer {
+  display: flex;
+  flex-direction: column;
+  width: 70%;
+  justify-content: center;
+}
+
 .side {
   width: 30%;
   padding: 12px;
@@ -36,17 +44,15 @@ html, body {
   box-shadow: 0px 0px 1px 1px rgb(218, 218, 218);
 }
 
-.dataContainer {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  max-width: 600px;
-}
-
 .header {
   text-align: center;
   font-size: 32px;
   font-weight: 600;
+}
+
+.header .twemoji {
+  width: 28px;
+  height: 28px;
 }
 
 .bio {
@@ -54,6 +60,11 @@ html, body {
   color: gray;
   margin-top: 14px;
   font-size: 18px;
+}
+
+.bio .twemoji {
+  width: 22px;
+  height: 22px;
 }
 
 .connect {
@@ -67,6 +78,11 @@ html, body {
   padding: 8px 8px;
   color: #f2f3f5;
   font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 60%;
 }
 
 .connected {
@@ -74,6 +90,11 @@ html, body {
   top: 12px;
   left: 12px;
   border: none;
+}
+
+.connected .twemoji {
+  width: 18px;
+  height: 18px;
 }
 
 .connected:disabled {
@@ -89,8 +110,11 @@ html, body {
   padding: 8px;
   border: 3px solid greenyellow;
   border-radius: 5px;
-  width: 80%;
+  width: 50%;
   transition: 0.3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .emojiButton:hover {
@@ -103,14 +127,25 @@ html, body {
   cursor: not-allowed;
 }
 
+.emojiButton .twemoji {
+  height: 20px;
+  width: 20px;
+  margin-left: 8px;
+}
+
 .emojis-container {
   margin: 42px auto;
   display: flex;
   flex-wrap: wrap;
   flex-direction: row;
   gap: 12px;
-  width: 70%;
+  width: 60%;
   justify-content: center;
+}
+
+.twemoji {
+  width: 40px;
+  height: 40px;
 }
 
 .emoji {
@@ -124,6 +159,10 @@ html, body {
   cursor: pointer;
   box-shadow: 1px 1px 1px rgb(240, 239, 239);
   transition: 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 700;
 }
 
 .emoji:hover {
@@ -132,21 +171,11 @@ html, body {
 }
 
 .emoji::placeholder {
-  color: rgba(0,0,0,0.1);
-}
-
-.emojis-container > input {
-  border: 2px solid blue;
-}
-
-.emojis-container > input:not(:placeholder-shown) {
-  border: 1px solid greenyellow;
-  box-shadow: 0px 0px 2px 2px greenyellow;
-  outline: none;
+  color: rgba(0, 0, 0, 0.1);
 }
 
 .selected-emoji {
-  border: 1px solid greenyellow;
+  border: 1px solid rgb(240, 239, 239);
   border-radius: 5px;
   width: 70px;
   height: 70px;
@@ -154,8 +183,11 @@ html, body {
   text-align: center;
   padding: 4px;
   cursor: pointer;
-  box-shadow: 0px 0px 2px 2px greenyellow;
+  box-shadow: 0px 0px 3px 3px greenyellow;
   transition: 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .selected-emoji:hover {
@@ -177,13 +209,13 @@ html, body {
   background-color: white;
 }
 
-.handler:not(:placeholder-shown):invalid  {
+.handler:not(:placeholder-shown):invalid {
   border: 2px solid red;
 }
 
 .emoji-record {
   background-color: rgb(255, 255, 255);
-  padding: 8px;
+  padding: 12px;
   border: 1px solid #c0c0c0;
   border-radius: 5px;
   margin: 12px auto;
@@ -207,7 +239,7 @@ html, body {
 
 .record-details a {
   background-color: transparent;
-  color: #1DA1F2;
+  color: #1da1f2;
   display: flex;
   align-items: bottom;
   font-size: 18px;
@@ -220,12 +252,14 @@ img {
 .record-emoji-logo {
   font-size: 52px;
   text-align: center;
-  margin-left: 12px;
   height: 70px;
   width: 70px;
   border: 1px solid rgb(201, 201, 201);
   border-radius: 5px;
   background-color: rgb(134, 134, 134);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .record-info {
@@ -240,6 +274,71 @@ img {
 .record-info > span {
   background-color: transparent;
 }
+
+.emoji-modal {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background-color: rgba(54, 54, 54, 0.8);
+  backdrop-filter: blur(8px);
+  box-shadow: 0px 0px 12px 6px rgba(54, 54, 54, 0.3);
+  display: flex;
+  flex-wrap: wrap;
+  border-radius: 20px;
+  padding: 12px 12px 12px 12px;
+} 
+
+.scrollbar {
+  background-color: transparent;
+}
+
+.scrollbar div {
+  background-color: transparent;
+}
+
+.emoji-modal span {
+  background-color: transparent;
+}
+
+.emoji-modal .twemoji {
+  width: 30px;
+  height: 30px;
+  margin: 8px;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.emoji-modal .twemoji:hover {
+  transform: scale(1.2);
+}
+
+.emoji-modal-tabs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  border-bottom: 1px solid rgb(196, 196, 196);
+}
+
+.emoji-modal-tab {
+  background-color: #73b1de;
+  border-right: 1px solid rgb(102, 102, 102);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2px 4px;
+}
+
+.emoji-modal-tab:nth-child(1) {
+  border-left: 1px solid rgb(102, 102, 102);
+}
+
+.emoji-modal-tab .twemoji {
+  width: 16px;
+  height: 16px;
+}
+
+/* Spinner */
 
 .loader,
 .loader:before,
@@ -332,12 +431,48 @@ img {
     top: 8px;
     height: 64px;
   }
-  50%, 100% {
+  50%,
+  100% {
     top: 24px;
     height: 32px;
   }
 }
 
+/* Text gradient */
+
+.linear-wipe {
+  text-align: center;
+  
+  background: linear-gradient(90deg, rgba(0,212,255,1) 0%, rgba(102,95,209,1) 20%, rgba(94,37,163,1) 48%, rgba(26,225,230,1) 72%, rgba(0,212,255,1) 100%);
+  background-size: 300% auto;
+  
+  background-clip: text;
+  text-fill-color: transparent;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  
+  animation: shine 2s linear infinite;
+}
+
+.linear-wipe-completed {
+  text-align: center;
+  
+  background: linear-gradient(90deg, rgba(198,255,0,1) 0%, rgba(95,209,114,1) 21%, rgba(58,191,127,1) 47%, rgba(160,230,26,1) 72%, rgba(125,255,0,1) 100%);
+  background-size: 300% auto;
+  
+  background-clip: text;
+  text-fill-color: transparent;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  
+  animation: shine 2s linear infinite;
+}
+
+@keyframes shine {
+  to {
+    background-position: 200% center;
+  }
+}
 
 @media only screen and (max-width: 600px) {
   .container {
@@ -360,10 +495,9 @@ img {
     gap: 18px;
   }
 
-  .emoji {
-    height: 70px;
-    width: 70px;
-    font-size: 50px;
+  .twemoji {
+    width: 40px;
+    height: 40px;
   }
 
   .selected-emoji {
@@ -379,11 +513,19 @@ img {
 
   .emojiButton {
     height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .emojiButton .twemoji {
+    height: 20px;
+    width: 20px;
+    margin-left: 8px;
   }
 
   h5 {
     font-size: 16px;
     text-align: center;
   }
-
 }

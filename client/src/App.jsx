@@ -1,31 +1,25 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import moment from 'moment';
 import abi from './utils/EmojiPortal.json';
 import './App.css';
-import TwitterLogo from './assets/twitter-logo.png';
 
-const emojis = ['😁', '😂', '🤦‍♂️', '⭐️', '🥰', '💕', '🙈', '💩', '😕', '🤮'];
+import { Emojis } from './components/Emojis/Emojis';
+import { SidePane } from './components/SidePane/SidePane';
+import { timestampToUTCFormat } from './helpers';
 
 const contractAddress = '0xC0a830E096834c027396606Cb514211a68456B23';
 const contractABI = abi.abi;
 
-const shortenAddress = (string) => {
-  const shortenString =
-    string.slice(0, 6) + '.....' + string.slice(string.length - 10, string.length - 1);
-  return shortenString;
-};
-
 export default function App() {
   const [currentAccount, setCurrentAccount] = useState(null);
   const [selectedEmoji, setSelectedEmoji] = useState(null);
-  const [showCustom, setShowCustom] = useState(false);
   const [customEmoji, setCustomEmoji] = useState('');
   const [handler, setHandler] = useState('');
   const [allEmojis, setAllEmojis] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [tnxLoading, setTnxLoading] = useState(false);
+  const [txnCompleted, setTxnCompleted] = useState(false);
 
   useEffect(() => {
     setIsLoading(true);
@@ -68,7 +62,6 @@ export default function App() {
       }
 
       const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-
       const account = accounts[0];
 
       console.log('Connected', account);
@@ -82,6 +75,7 @@ export default function App() {
     setTnxLoading(true);
     try {
       const { ethereum } = window;
+      setTxnCompleted(false);
 
       if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum);
@@ -95,10 +89,12 @@ export default function App() {
         console.log('Mining...', emojiTxn.hash);
 
         await emojiTxn.wait();
-        
-        setTnxLoading(false);
-        getAllEmojis();
+
         console.log('Mined ---', emojiTxn.hash);
+
+        setTxnCompleted(true);
+        getAllEmojis();
+        setTnxLoading(false);
       } else {
         console.log('Ethereum object does not exist');
       }
@@ -121,24 +117,21 @@ export default function App() {
       const emojiPortalContract = new ethers.Contract(contractAddress, contractABI, signer);
 
       const emojis = await emojiPortalContract.getAllEmojis();
-
       const filteredEmojis = emojis.map((emoji) => {
-        const d = new Date(emoji.timestamp * 1000);
-        const time = d.toUTCString();
-        const UTC = time.substring(0, time.indexOf('GMT')) + 'UTC';
-
         return {
           address: emoji.sender,
           author: emoji.author,
           emoji: emoji.emoji,
-          timestamp: moment(UTC).format('DD MMMM, hh:mm:ss A'),
+          timestamp: timestampToUTCFormat(emoji.timestamp),
+          blockTime: emoji.timestamp.toNumber(),
         };
       });
 
-      const sortedEmojis = filteredEmojis.sort((a, b) => b.timestamp - a.timestamp);
+      const sortedEmojis = filteredEmojis.sort((a, b) => b.blockTime - a.blockTime);
 
       setAllEmojis(sortedEmojis);
       setIsLoading(false);
+      window.twemoji.parse(document.body, { className: 'twemoji' });
     } catch (error) {
       console.log(error);
       setIsLoading(false);
@@ -147,15 +140,23 @@ export default function App() {
 
   return (
     <div className="container">
-      <div className={currentAccount ? "mainContainer-login" : "mainContainer"}>
+      <div className={currentAccount ? 'mainContainer-login' : 'mainContainer'}>
         <div className="dataContainer">
-          <div className="header">Hey there 😁</div>
+          <div className="header">
+            Hey there{' '}
+            <span role="img" aria-label="smiing emoji">
+              😁
+            </span>
+          </div>
           <div className="bio">
             This is my first deployed app following Solidity course from <strong>builspace</strong>{' '}
             .
           </div>
           <div className="bio">
-            Pick one of the emojis you like and leave some message for me 😉
+            Pick one of the emojis you like and leave your Twitter handler for everyone to see{' '}
+            <span role="img" aria-label="wink emoji">
+              😉
+            </span>
           </div>
           <div className="bio" style={{ fontWeight: 700 }}>
             YOOO THIS IS FREE. NO WORRIES
@@ -167,83 +168,42 @@ export default function App() {
           >
             {currentAccount ? '✅ Wallet Connected' : 'Connect your wallet 🤑'}
           </button>
-          <div className="emojis-container">
-            {emojis.map((emoji, i) => (
-              <div
-                className={i === emojis.indexOf(selectedEmoji) ? 'selected-emoji' : 'emoji'}
-                onClick={() => setSelectedEmoji(emoji)}
-              >
-                {emoji}
-              </div>
-            ))}
-            {!showCustom && (
-              <button
-                className="emoji"
-                style={{ fontSize: '14px' }}
-                onClick={() => setShowCustom(!showCustom)}
-              >
-                Custom Emoji
-              </button>
-            )}
-            {showCustom && (
-              <input
-                className="emoji"
-                type="text"
-                placeholder="🤔"
-                value={customEmoji}
-                autoFocus
-                onBlur={() => setShowCustom(!showCustom)}
-                onChange={(e) => {
-                  setSelectedEmoji(e.target.value);
-                  setCustomEmoji(e.target.value);
-                }}
-              />
-            )}
-          </div>
-          <input
-            value={handler}
-            placeholder="@TwitterHandler"
-            className="handler"
-            onChange={(e) => setHandler(e.target.value)}
-            pattern="^@[A-Za-z0-9_]{1,15}$"
-            required
+          <Emojis
+            customEmoji={customEmoji}
+            selectedEmoji={selectedEmoji}
+            setCustomEmoji={setCustomEmoji}
+            setSelectedEmoji={setSelectedEmoji}
           />
-          <button className="emojiButton" onClick={emojiMe} disabled={!currentAccount || !handler || tnxLoading}>
-            {tnxLoading ? 'Loading...' : (
-              'SEND EMOJI 🙏'
-            )}
-          </button>
+          {tnxLoading && <h1 className="linear-wipe">Mining...</h1>}
+          {txnCompleted && (
+            <h1 style={{ textAlign: 'center', color: 'purple' }} className="linear-wipe-completed">
+              Your transaction is successful!
+            </h1>
+          )}
+          {currentAccount && (
+            <>
+              <input
+                value={handler}
+                placeholder="@TwitterHandler"
+                className="handler"
+                onChange={(e) => setHandler(e.target.value)}
+                pattern="^@[A-Za-z0-9_]{1,15}$"
+                required
+                disabled={isLoading || tnxLoading}
+              />
+              <button
+                className="emojiButton"
+                onClick={emojiMe}
+                disabled={!currentAccount || !handler || tnxLoading}
+              >
+                {tnxLoading ? 'Loading...' : 'SEND EMOJI 🙏'}
+              </button>
+            </>
+          )}
         </div>
       </div>
       {currentAccount && (
-        <div className="side">
-        {isLoading ? (
-          <div class="loader">Loading...</div>
-        ) : (
-          <>
-            <h3 style={{ textAlign: 'center', backgroundColor: 'transparent' }}>
-              Thank you for your emojis 💕
-            </h3>
-            <h5 style={{ backgroundColor: 'transparent' }}>Total emojis: {allEmojis.length}</h5>
-            {allEmojis.length &&
-              allEmojis.map((emoji) => (
-                <div className="emoji-record">
-                  <div className="record-details">
-                    <span className="record-emoji-logo">{emoji.emoji}</span>
-                    <a href={`https://twitter.com/${emoji.author}`} target="_blank">
-                      <img src={TwitterLogo} width="22px" height="22px" />
-                      {emoji.author}
-                    </a>
-                  </div>
-                  <div className="record-info">
-                    <span>{shortenAddress(emoji.address)}</span>
-                    <span>{emoji.timestamp}</span>
-                  </div>
-                </div>
-              ))}
-          </>
-        )}
-      </div>
+        <SidePane allEmojis={allEmojis} isLoading={isLoading} tnxLoading={tnxLoading} />
       )}
     </div>
   );
